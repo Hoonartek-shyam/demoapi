@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-
+import os
 app = Flask(__name__)
 
 #SQLite configuration (replace 'example.db' with your desired database name)
@@ -61,4 +61,6 @@ if __name__ == '__main__':
         db.create_all()
     # Create tables before running the app
     # db.create_all()
-    app.run(debug=True)
+    # app.run(debug=True)
+    port = int(os.environ.get("PORT", 443))
+    app.run(host='0.0.0.0', port=port, debug=True)
