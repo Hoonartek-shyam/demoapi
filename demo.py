@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
+
 app = Flask(__name__)
 
-#SQLite configuration (replace 'example.db' with your desired database name)
+# SQLite configuration (replace 'example.db' with your desired database name)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///example.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -24,8 +25,6 @@ class HealthInsurance(db.Model):
     nominee_name = db.Column(db.String(50), nullable=False)
     nominee_gender = db.Column(db.String(50), nullable=False)
     proposer_name = db.Column(db.String(50), nullable=False)
-
-
 
 
 @app.route('/store_health_data', methods=['POST'])
@@ -53,6 +52,48 @@ def store_health_data():
     db.session.commit()
 
     return jsonify({"message": "Health data stored successfully"}), 201
+
+
+@app.route('/get_health_data', methods=['GET'])
+def get_health_data():
+    health_data = HealthInsurance.query.all()
+    data_list = []
+    for data in health_data:
+        data_list.append({
+            'name': data.name,
+            'age': data.age,
+            'mobile': data.mobile,
+            'email': data.email,
+            'gender': data.gender,
+            'plan': data.plan,
+            'pan': data.pan,
+            'dob': data.dob,
+            'nominee_name': data.nominee_name,
+            'nominee_gender': data.nominee_gender,
+            'proposer_name': data.proposer_name
+        })
+    return jsonify({"health_data": data_list})
+
+
+@app.route('/get_health_data_by_mobile/<mobile>', methods=['GET'])
+def get_health_data_by_mobile(mobile):
+    health_data = HealthInsurance.query.filter_by(mobile=mobile).first()
+    if health_data:
+        return jsonify({
+            'name': health_data.name,
+            'age': health_data.age,
+            'mobile': health_data.mobile,
+            'email': health_data.email,
+            'gender': health_data.gender,
+            'plan': health_data.plan,
+            'pan': health_data.pan,
+            'dob': health_data.dob,
+            'nominee_name': health_data.nominee_name,
+            'nominee_gender': health_data.nominee_gender,
+            'proposer_name': health_data.proposer_name
+        })
+    else:
+        return jsonify({"message": "Health data not found for the given mobile number"}), 404
 
 
 if __name__ == '__main__':
