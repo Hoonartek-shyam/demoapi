@@ -25,6 +25,8 @@ class HealthInsurance(db.Model):
     nominee_name = db.Column(db.String(50), nullable=False)
     nominee_gender = db.Column(db.String(50), nullable=False)
     proposer_name = db.Column(db.String(50), nullable=False)
+    proposer_gender = db.Column(db.String(50), nullable=False)
+    nominee_details = db.Column(db.String(50), nullable=False)
 
 
 @app.route('/store_health_data', methods=['POST'])
@@ -43,8 +45,10 @@ def store_health_data():
         pan=data['pan'],
         dob=data['dob'],
         nominee_name=data['nominee_name'],
+        nominee_details=data['nominee_details'],
         nominee_gender=data['nominee_gender'],
-        proposer_name=data['proposer_name']
+        proposer_name=data['proposer_name'],
+        proposer_gender=data['proposer_gender']
     )
 
     # Add and commit the new data to the database
@@ -70,7 +74,9 @@ def get_health_data():
             'dob': data.dob,
             'nominee_name': data.nominee_name,
             'nominee_gender': data.nominee_gender,
-            'proposer_name': data.proposer_name
+            'proposer_name': data.proposer_name,
+            'nominee_details': data.nominee_details,
+            'proposer_gender': data.proposer_gender
         })
     return jsonify({"health_data": data_list})
 
@@ -90,8 +96,21 @@ def get_health_data_by_mobile(mobile):
             'dob': health_data.dob,
             'nominee_name': health_data.nominee_name,
             'nominee_gender': health_data.nominee_gender,
-            'proposer_name': health_data.proposer_name
+            'proposer_name': health_data.proposer_name,
+            'nominee_details': health_data.nominee_details,
+            'proposer_gender': health_data.proposer_gender
         })
+    else:
+        return jsonify({"message": "Health data not found for the given mobile number"}), 404
+
+
+@app.route('/delete_health_data_by_mobile/<mobile>', methods=['DELETE'])
+def del_health_data(mobile):
+    health_data = HealthInsurance.query.filter_by(mobile=mobile).first()
+    if health_data:
+        db.session.delete(health_data)
+        db.session.commit()
+        return jsonify({"message": "Health data deleted successfully"}), 200
     else:
         return jsonify({"message": "Health data not found for the given mobile number"}), 404
 
